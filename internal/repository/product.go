@@ -17,6 +17,12 @@ type ProductRepo struct {
 	dbHandler *database.DBHandler
 }
 
+func NewProductRepo(dbHandler *database.DBHandler) *ProductRepo {
+	return &ProductRepo{
+		dbHandler: dbHandler,
+	}
+}
+
 type CreateProductRequest struct {
 	Name        string   `json:"name"`
 	Description *string  `json:"description"`

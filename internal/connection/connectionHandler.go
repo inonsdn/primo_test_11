@@ -8,24 +8,31 @@ import (
 	"os"
 	"os/signal"
 	"primo_test_11/internal/config"
-	"primo_test_11/internal/database"
+	"primo_test_11/internal/handler"
 	"syscall"
 	"time"
 )
 
 type ConnectionHandler struct {
-	config    *config.Config
-	dbHandler *database.DBHandler
+	config  *config.Config
+	product *handler.ProductHandler
 }
 
 // construct a connection handler for storing config and db handler
 // this struct will make router function handler able to access database
 // and manipulate data to database with limitation of db handler
-func NewConnectionHandler(config *config.Config, dbHandler *database.DBHandler) *ConnectionHandler {
+func NewConnectionHandler(config *config.Config, product *handler.ProductHandler) *ConnectionHandler {
 	slog.Info("Create connection")
+
+	routePaths := product.GetRouteInfo()
+	for _, routePath := range routePaths {
+		http.Handle(routePath.Path, handler.MakeHandler(routePath))
+		slog.Debug(fmt.Sprintf("Found path for register %s", routePath.Path))
+	}
+
 	return &ConnectionHandler{
-		config:    config,
-		dbHandler: dbHandler,
+		config:  config,
+		product: product,
 	}
 }
 

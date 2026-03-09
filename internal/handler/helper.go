@@ -5,6 +5,29 @@ import (
 	"net/http"
 )
 
+type RouteHandlerFunc func(http.ResponseWriter, *http.Request)
+
+type RoutePath struct {
+	Method  string
+	Path    string
+	Handler RouteHandlerFunc
+}
+
+// Create handler function for serve http
+// by wrapping function
+// function must receive argument of route handler
+func MakeHandler(rp RoutePath) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// verify method
+		if r.Method != rp.Method {
+			ResponseError(w, http.StatusMethodNotAllowed, "Invalid method")
+		} else {
+			// execute function
+			rp.Handler(w, r)
+		}
+	}
+}
+
 // send response back in JSON format
 func ResponseJSON(w http.ResponseWriter, status int, data any) {
 	// set header of response to be type of json
