@@ -1,0 +1,39 @@
+Non Functional Requirement:
+- Unit test
+	- Component test (E2E within service)
+	- user case unit test (orchrestrator)
+	- service/domain unit test (function)
+	- repository unit test (integration)
+
+- Swagger for API Document /api-docs
+- How to start service
+- Clean architecture and dependency injection
+- DB: PosgresQLGiven: API Service has following configuration
+- Rest API Spec
+
+Create Product    POST /product
+    BODY {
+        name: string,           
+        description: string(nullable),           
+        sale_price: double (nullable),
+        price: double,
+    }
+    Response {
+        successful: bool,
+        error_code: "string",
+        data: null | {
+            data1: "string"
+            data2: "string"
+        }
+    }
+Patch product รองรับการส่งเข้ามาเฉพาะ field ที่ต้องการแก้ไขและเขียนทับเฉพาะ field นั้น    PATCH /product/{id}
+    BODY {
+        name: string (allow undefined),                      
+        description: string(allow undefined,nullable),                      
+        sale_price: double (allow undefined, nullable),
+        price: double(allow undefined),
+    }
+    Response {
+        successful: bool,
+        error_code: "string",
+    }
