@@ -3,7 +3,6 @@ package connection
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,12 +21,12 @@ type ConnectionHandler struct {
 // this struct will make router function handler able to access database
 // and manipulate data to database with limitation of db handler
 func NewConnectionHandler(config *config.Config, product *handler.ProductHandler) *ConnectionHandler {
-	slog.Info("Create connection")
+	fmt.Println("Create connection")
 
 	routePaths := product.GetRouteInfo()
 	for _, routePath := range routePaths {
 		http.Handle(routePath.Path, handler.MakeHandler(routePath))
-		slog.Debug(fmt.Sprintf("Found path for register %s", routePath.Path))
+		fmt.Println(fmt.Sprintf("Found path for register %s", routePath.Path))
 	}
 
 	return &ConnectionHandler{
@@ -44,7 +43,7 @@ func runServer(server *http.Server, done chan struct{}) {
 	// run serve
 	err := server.ListenAndServe()
 	if err != nil {
-		slog.Error("Stop service with error")
+		fmt.Println("Stop service with error")
 	}
 }
 
@@ -53,7 +52,7 @@ func runServer(server *http.Server, done chan struct{}) {
 func (c *ConnectionHandler) RunServe() {
 	// get address to serve from config
 	addr := c.config.GetAddr()
-	slog.Info(fmt.Sprintf("Run serve address %s", addr))
+	fmt.Println(fmt.Sprintf("Run serve address %s", addr))
 
 	// register channel for trap signal to this process
 	// if got sigint or sigterm, will handle to close service gracefully
@@ -80,6 +79,6 @@ func (c *ConnectionHandler) RunServe() {
 		server.Shutdown(ctx)
 	// case server process is done even error
 	case <-serveDone:
-		slog.Info("Server is shutting down")
+		fmt.Println("Server is shutting down")
 	}
 }

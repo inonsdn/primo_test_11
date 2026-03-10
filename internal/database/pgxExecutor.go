@@ -2,7 +2,8 @@ package database
 
 import (
 	"context"
-	"log/slog"
+	"fmt"
+	"primo_test_11/internal/config"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -12,9 +13,22 @@ type PGExecutor struct {
 	pool   *pgxpool.Pool
 }
 
-func NewPGExecutor(config *pgxpool.Config) *PGExecutor {
+func NewPGExecutor(config *config.DBConfig) *PGExecutor {
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		config.User,
+		config.Password,
+		config.Host,
+		config.Port,
+		config.Dbname,
+	)
+	pgxConfig, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil
+	}
 	return &PGExecutor{
-		config: config,
+		config: pgxConfig,
 	}
 }
 
@@ -57,10 +71,11 @@ func (pg *PGExecutor) Query(ctx context.Context, statement string, args ...any) 
 func (pg *PGExecutor) Connect() error {
 	poolCon, err := pgxpool.NewWithConfig(context.Background(), pg.config)
 	if err != nil {
-		slog.Error(err.Error())
+		fmt.Println(err.Error())
 		return err
 	}
 	pg.pool = poolCon
+	initTable(pg)
 	return nil
 }
 

@@ -24,15 +24,15 @@ func sqlStructExtraction[T any](s T) ([]string, []any) {
 	for i := 0; i < key.NumField(); i++ {
 		colName := key.Field(i).Tag.Get("json")
 		colVal := val.Field(i)
-
-		if val.Kind() == reflect.Ptr {
-			if val.IsNil() {
+		actualVal := colVal
+		if colVal.Kind() == reflect.Ptr {
+			if colVal.IsNil() {
 				continue
 			}
-			colVal = val.Elem()
+			actualVal = colVal.Elem()
 		}
 
-		values = append(values, colVal)
+		values = append(values, actualVal.Interface())
 		colNames = append(colNames, colName)
 	}
 	return colNames, values

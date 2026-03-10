@@ -1,6 +1,10 @@
 package database
 
-import "context"
+import (
+	"context"
+	"fmt"
+	"time"
+)
 
 // Interface for execute to databse, expected method that must have
 //
@@ -15,15 +19,22 @@ type DBExecutor interface {
 	QueryRow(context.Context, []any, string, ...any) error
 }
 
-type DBHandler struct {
-	Dbx DBExecutor
-}
-
-func NewDBHandler(db DBExecutor) *DBHandler {
-	db.Connect()
-	dbHandler := DBHandler{
-		Dbx: db,
+func initTable(db DBExecutor) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	statement := `
+	CREATE TABLE IF NOT EXISTS product (
+		id SERIAL PRIMARY KEY,
+		name TEXT NOT NULL,
+		description TEXT,
+		sale_price NUMERIC(10, 2),
+		price NUMERIC(10, 2) NOT NULL
+	);
+	`
+	_, err := db.Execute(ctx, statement)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
 	}
-
-	return &dbHandler
+	return nil
 }

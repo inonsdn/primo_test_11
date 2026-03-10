@@ -2,17 +2,22 @@ package config
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
-	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
+	"strconv"
 )
 
 type Config struct {
 	host        string
 	port        int
 	databaseUrl string
+}
+
+type DBConfig struct {
+	User     string
+	Password string
+	Host     string
+	Port     string
+	Dbname   string
 }
 
 type ConfigFunc func(c *Config)
@@ -30,44 +35,43 @@ func (c *Config) GetAddr() string {
 }
 
 func defaultConfig() *Config {
+	host := os.Getenv("HOST")
+	port := os.Getenv("PORT")
+	portNum, err := strconv.Atoi(port)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil
+	}
 	return &Config{
-		host: "localhost",
-		port: 8080,
+		host: host,
+		port: portNum,
 	}
 }
 
 func LoadConfig(cf ...ConfigFunc) *Config {
 	config := defaultConfig()
+	if config == nil {
+		return nil
+	}
 	for _, f := range cf {
 		f(config)
 	}
 	return config
 }
 
-func LoadDatabaseConfig() (*pgxpool.Config, error) {
+func LoadDatabaseConfig() *DBConfig {
 	user := os.Getenv("DATABASE_USER")
 	password := os.Getenv("DATABASE_PASSWORD")
 	host := os.Getenv("DATABASE_HOST")
 	port := os.Getenv("DATABASE_PORT")
 	dbname := os.Getenv("DATABASE_DBNAME")
-	dsn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=require",
-		user,
-		password,
-		host,
-		port,
-		dbname,
-	)
-	config, err := pgxpool.ParseConfig(dsn)
-	if err != nil {
-		slog.Error(err.Error())
-		return nil, err
+	config := DBConfig{
+		User:     user,
+		Password: password,
+		Host:     host,
+		Port:     port,
+		Dbname:   dbname,
 	}
 
-	// Good defaults to avoid too many connections on Supabase
-	config.MaxConns = 5
-	config.MinConns = 1
-	config.MaxConnIdleTime = 5 * time.Minute
-	config.HealthCheckPeriod = 30 * time.Second
-	return config, nil
+	return &config
 }

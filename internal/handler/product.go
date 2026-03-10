@@ -9,7 +9,7 @@ import (
 )
 
 type ProductHandler struct {
-	productRepo *repository.ProductRepo
+	productRepo repository.ProductRepoInterface
 }
 
 func (p *ProductHandler) GetRouteInfo() []RoutePath {
@@ -27,7 +27,7 @@ func (p *ProductHandler) GetRouteInfo() []RoutePath {
 	}
 }
 
-func NewProductHandler(productRepo *repository.ProductRepo) *ProductHandler {
+func NewProductHandler(productRepo repository.ProductRepoInterface) *ProductHandler {
 	return &ProductHandler{productRepo: productRepo}
 }
 
@@ -39,7 +39,9 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		ResponseJSON(w, http.StatusBadRequest, map[string]any{
 			"successful": false,
 			"error_code": http.StatusBadRequest,
-			"data":       nil,
+			"data": map[string]any{
+				"error": err,
+			},
 		})
 		return
 	}
@@ -47,7 +49,13 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	productId, err := p.productRepo.CreateProduct(params)
 
 	if err != nil {
-		// response error
+		ResponseJSON(w, http.StatusBadRequest, map[string]any{
+			"successful": false,
+			"error_code": http.StatusBadRequest,
+			"data": map[string]any{
+				"error": err,
+			},
+		})
 		return
 	}
 
@@ -62,12 +70,15 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("UpdateProduct")
+	fmt.Println("UpdateProduct", r.PathValue("id"))
 	productId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		ResponseJSON(w, http.StatusBadRequest, map[string]any{
 			"successful": false,
 			"error_code": http.StatusBadRequest,
+			"data": map[string]any{
+				"error": err,
+			},
 		})
 		return
 	}
@@ -76,14 +87,34 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		ResponseJSON(w, http.StatusBadRequest, map[string]any{
 			"successful": false,
 			"error_code": http.StatusBadRequest,
+			"data": map[string]any{
+				"error": err,
+			},
 		})
 		return
 	}
 
-	err = p.productRepo.UpdateProduct(productId, params)
+	rowAffected, err := p.productRepo.UpdateProduct(productId, params)
 
 	if err != nil {
-		// response error
+		ResponseJSON(w, http.StatusBadRequest, map[string]any{
+			"successful": false,
+			"error_code": http.StatusBadRequest,
+			"data": map[string]any{
+				"error": err,
+			},
+		})
+		return
+	}
+
+	if rowAffected == 0 {
+		ResponseJSON(w, http.StatusBadRequest, map[string]any{
+			"successful": false,
+			"error_code": http.StatusBadRequest,
+			"data": map[string]any{
+				"error": fmt.Sprintf("Not found product id %d", productId),
+			},
+		})
 		return
 	}
 

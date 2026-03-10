@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log/slog"
+	"fmt"
 	"primo_test_11/internal/config"
 	"primo_test_11/internal/connection"
 	"primo_test_11/internal/database"
@@ -12,26 +12,28 @@ import (
 func main() {
 
 	// load config of database
-	dbConfig, err := config.LoadDatabaseConfig()
-	if err != nil {
-		slog.Error("Got error when load config")
-		slog.Error(err.Error())
-		return
-	}
+	dbConfig := config.LoadDatabaseConfig()
 	// construct db handler with executor
 	pgExecutor := database.NewPGExecutor(dbConfig)
-	dbHandler := database.NewDBHandler(pgExecutor)
-
-	if dbHandler == nil {
+	if pgExecutor == nil {
+		return
+	}
+	err := pgExecutor.Connect()
+	if err != nil {
+		fmt.Println("Error when connect to database", err)
 		return
 	}
 
 	// construct repo and handler of repo
-	productRepo := repository.NewProductRepo(dbHandler)
+	productRepo := repository.NewProductRepo(pgExecutor)
 	productHandler := handler.NewProductHandler(productRepo)
 
 	// construct http connection handler
 	serverConfig := config.LoadConfig()
+	if serverConfig == nil {
+		fmt.Println("Cannot load config")
+		return
+	}
 	handler := connection.NewConnectionHandler(serverConfig, productHandler)
 
 	// run forever loop

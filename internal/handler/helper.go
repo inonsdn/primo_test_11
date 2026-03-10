@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -18,6 +19,7 @@ type RoutePath struct {
 // function must receive argument of route handler
 func MakeHandler(rp RoutePath) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("===========")
 		// verify method
 		if r.Method != rp.Method {
 			ResponseError(w, http.StatusMethodNotAllowed, "Invalid method")
