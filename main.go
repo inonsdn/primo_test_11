@@ -1,3 +1,8 @@
+// @title Primo Test 11 API
+// @version 1.0
+// @description Product service for the coding assignment
+// @host localhost:8080
+// @BasePath /
 package main
 
 import (

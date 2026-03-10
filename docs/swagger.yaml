@@ -1,0 +1,96 @@
+basePath: /
+definitions:
+  handler.CommonResponse:
+    properties:
+      data: {}
+      error_code: {}
+      successful:
+        type: boolean
+    type: object
+  repository.CreateProductRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      sale_price:
+        type: number
+    type: object
+  repository.UpdateProductRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      sale_price:
+        type: number
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Product service for the coding assignment
+  title: Primo Test 11 API
+  version: "1.0"
+paths:
+  /product:
+    post:
+      consumes:
+      - application/json
+      description: Create a new product
+      parameters:
+      - description: Create product payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/repository.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.CommonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.CommonResponse'
+      summary: Create product
+      tags:
+      - product
+  /product/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Partially update a product by id
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update product payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/repository.UpdateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.CommonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.CommonResponse'
+      summary: Update product
+      tags:
+      - product
+swagger: "2.0"

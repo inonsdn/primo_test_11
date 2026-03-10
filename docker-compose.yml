@@ -14,7 +14,7 @@ services:
         interval: 3s
         timeout: 5s
         retries: 10
-        start_period: 10s   # ← give postgres time to boot first
+        start_period: 10s
 
 
   app:

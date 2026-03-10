@@ -14,6 +14,12 @@ type RoutePath struct {
 	Handler RouteHandlerFunc
 }
 
+type CommonResponse struct {
+	Successful bool `json:"successful"`
+	ErrorCode  any  `json:"error_code"`
+	Data       any  `json:"data"`
+}
+
 // Create handler function for serve http
 // by wrapping function
 // function must receive argument of route handler
@@ -44,4 +50,20 @@ func ResponseJSON(w http.ResponseWriter, status int, data any) {
 
 func ResponseError(w http.ResponseWriter, status int, message string) {
 	http.Error(w, message, status)
+}
+
+func SuccessResponse(data any) CommonResponse {
+	return CommonResponse{
+		Successful: true,
+		ErrorCode:  "",
+		Data:       data,
+	}
+}
+
+func ErrorResponse(code int, msg string) CommonResponse {
+	return CommonResponse{
+		Successful: false,
+		ErrorCode:  code,
+		Data:       map[string]any{"error": msg},
+	}
 }

@@ -10,6 +10,10 @@ import (
 	"primo_test_11/internal/handler"
 	"syscall"
 	"time"
+
+	_ "primo_test_11/docs"
+
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 type ConnectionHandler struct {
@@ -50,6 +54,8 @@ func runServer(server *http.Server, done chan struct{}) {
 // run server and handle to shutdown server gracefully
 // such as got signal interupt or terminate
 func (c *ConnectionHandler) RunServe() {
+	http.Handle("/api-docs/", httpSwagger.WrapHandler)
+
 	// get address to serve from config
 	addr := c.config.GetAddr()
 	fmt.Println(fmt.Sprintf("Run serve address %s", addr))

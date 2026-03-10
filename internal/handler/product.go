@@ -31,96 +31,72 @@ func NewProductHandler(productRepo repository.ProductRepoInterface) *ProductHand
 	return &ProductHandler{productRepo: productRepo}
 }
 
+// CreateProduct godoc
+// @Summary Create product
+// @Description Create a new product
+// @Tags product
+// @Accept json
+// @Produce json
+// @Param request body repository.CreateProductRequest true "Create product payload"
+// @Success 200 {object} handler.CommonResponse
+// @Failure 400 {object} handler.CommonResponse
+// @Router /product [post]
 func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("CreateProduct")
 
 	var params repository.CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"successful": false,
-			"error_code": http.StatusBadRequest,
-			"data": map[string]any{
-				"error": err,
-			},
-		})
+		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 
 	productId, err := p.productRepo.CreateProduct(params)
 
 	if err != nil {
-		ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"successful": false,
-			"error_code": http.StatusBadRequest,
-			"data": map[string]any{
-				"error": err,
-			},
-		})
+		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 
 	// response
-	ResponseJSON(w, http.StatusOK, map[string]any{
-		"successful": true,
-		"error_code": "",
-		"data": map[string]any{
-			"id": productId,
-		},
-	})
+	ResponseJSON(w, http.StatusOK, SuccessResponse(map[string]any{"id": productId}))
 }
 
+// UpdateProduct godoc
+// @Summary Update product
+// @Description Partially update a product by id
+// @Tags product
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Param request body repository.UpdateProductRequest true "Update product payload"
+// @Success 200 {object} handler.CommonResponse
+// @Failure 400 {object} handler.CommonResponse
+// @Router /product/{id} [patch]
 func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("UpdateProduct", r.PathValue("id"))
 	productId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"successful": false,
-			"error_code": http.StatusBadRequest,
-			"data": map[string]any{
-				"error": err,
-			},
-		})
+		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 	var params repository.UpdateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"successful": false,
-			"error_code": http.StatusBadRequest,
-			"data": map[string]any{
-				"error": err,
-			},
-		})
+		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 
 	rowAffected, err := p.productRepo.UpdateProduct(productId, params)
 
 	if err != nil {
-		ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"successful": false,
-			"error_code": http.StatusBadRequest,
-			"data": map[string]any{
-				"error": err,
-			},
-		})
+		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 
 	if rowAffected == 0 {
-		ResponseJSON(w, http.StatusBadRequest, map[string]any{
-			"successful": false,
-			"error_code": http.StatusBadRequest,
-			"data": map[string]any{
-				"error": fmt.Sprintf("Not found product id %d", productId),
-			},
-		})
+		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, fmt.Sprintf("Not found product id %d", productId)))
 		return
 	}
 
 	// response
-	ResponseJSON(w, http.StatusOK, map[string]any{
-		"successful": true,
-		"error_code": "",
-	})
+	ResponseJSON(w, http.StatusOK, SuccessResponse(nil))
 }
