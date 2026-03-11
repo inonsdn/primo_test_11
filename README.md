@@ -9,7 +9,8 @@ To run all, using
 ```
 
 by default will serve at localhost:8080.
-For config 
+
+For documents path `http://localhost:8080/api-docs/`
 
 To stop service use
 ```

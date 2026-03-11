@@ -50,14 +50,19 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: verify field of attribute that must be sent which is name and price
+	//	and validate type of data
+
+	// create product to database
 	productId, err := p.productRepo.CreateProduct(params)
 
+	// response error if got an error
 	if err != nil {
 		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 
-	// response
+	// response successful
 	ResponseJSON(w, http.StatusOK, SuccessResponse(map[string]any{"id": productId}))
 }
 
@@ -74,6 +79,8 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 // @Router /product/{id} [patch]
 func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("UpdateProduct", r.PathValue("id"))
+
+	// get id from path value
 	productId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
@@ -85,13 +92,16 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// update product to database
 	rowAffected, err := p.productRepo.UpdateProduct(productId, params)
 
+	// response error if got an error
 	if err != nil {
 		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, err.Error()))
 		return
 	}
 
+	// in case no row effect, means no product id of given
 	if rowAffected == 0 {
 		ResponseJSON(w, http.StatusBadRequest, ErrorResponse(http.StatusBadRequest, fmt.Sprintf("Not found product id %d", productId)))
 		return

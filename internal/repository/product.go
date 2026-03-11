@@ -34,23 +34,11 @@ type CreateProductRequest struct {
 	Price       float64  `json:"price"`
 }
 
-type CreateProductResponse struct {
-	Id int `json:"id"`
-}
-
 type UpdateProductRequest struct {
 	Name        *string  `json:"name"`
 	Description *string  `json:"description"`
 	SalePrice   *float64 `json:"sale_price"`
 	Price       *float64 `json:"price"`
-}
-
-type UpdateProductResponse struct {
-	Id        int    `json:"id"`
-	Title     string `json:"title"`
-	Text      string `json:"text"`
-	UserId    int    `json:"user_id"`
-	NoteGroup int    `json:"note_group"`
 }
 
 func (p *ProductRepo) CreateProduct(c CreateProductRequest) (int, error) {
@@ -62,8 +50,7 @@ func (p *ProductRepo) CreateProduct(c CreateProductRequest) (int, error) {
 	placeholdersStr := buildPlaceholders(len(values), 0)
 
 	statement := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) RETURNING id", PRODUCT_TABLE_NAME, colStr, placeholdersStr)
-	fmt.Println("[CreateProduct] Execute statement", statement, c)
-	fmt.Println("[CreateProduct] Params", values)
+
 	var productId int
 	err := p.dbx.QueryRow(ctx, []any{&productId}, statement, values...)
 	if err != nil {
@@ -97,8 +84,7 @@ func (p *ProductRepo) UpdateProduct(productId int, u UpdateProductRequest) (int,
 	}
 
 	statement := fmt.Sprintf("UPDATE %s SET %s = %s WHERE id = $1", PRODUCT_TABLE_NAME, updateColStr, updatePlaceholdersStr)
-	fmt.Println("[UpdateProduct] Execute statement", statement)
-	fmt.Println("[UpdateProduct] Params", args)
+
 	rowAffect, err := p.dbx.Execute(ctx, statement, args...)
 	if err != nil {
 		fmt.Println(err.Error())
