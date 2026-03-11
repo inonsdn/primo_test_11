@@ -86,3 +86,5 @@ func TestUpdateProduct(t *testing.T) {
 	fmt.Println(response)
 	assert.Equal(t, true, response["successful"])
 }
+
+// TODO: test case error response from update

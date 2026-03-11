@@ -3,7 +3,11 @@ package database
 import (
 	"context"
 	"fmt"
+	"math"
+	"math/big"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // Interface for execute to databse, expected method that must have
@@ -17,6 +21,24 @@ type DBExecutor interface {
 	Execute(context.Context, string, ...any) (int64, error)
 	Query(context.Context, string, ...any) ([]map[string]any, error)
 	QueryRow(context.Context, []any, string, ...any) error
+}
+
+func convertValue(v any) any {
+	switch val := v.(type) {
+	case pgtype.Numeric:
+		if val.Int == nil {
+			return nil
+		}
+		f, _ := new(big.Float).SetInt(val.Int).Float64()
+		if val.Exp != 0 {
+			f = f * math.Pow10(int(val.Exp))
+		}
+		// convert to float64
+		return f
+
+	default:
+		return v
+	}
 }
 
 func initTable(db DBExecutor) error {

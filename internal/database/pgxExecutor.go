@@ -61,7 +61,7 @@ func (pg *PGExecutor) Query(ctx context.Context, statement string, args ...any) 
 		values, _ := rows.Values()
 		row := map[string]any{}
 		for i, fd := range fds {
-			row[string(fd.Name)] = values[i]
+			row[string(fd.Name)] = convertValue(values[i])
 		}
 		allRows = append(allRows, row)
 	}
